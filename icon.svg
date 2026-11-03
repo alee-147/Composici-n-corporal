@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- cinta extendida -->
+  <path d="M250 318 L470 318 L470 380 L250 380 Z" fill="#fde047" stroke="#a16207" stroke-width="5"/>
+  <g stroke="#3f2d06" stroke-width="5" stroke-linecap="round">
+    <line x1="300" y1="318" x2="300" y2="356"/><line x1="325" y1="318" x2="325" y2="340"/>
+    <line x1="350" y1="318" x2="350" y2="356"/><line x1="375" y1="318" x2="375" y2="340"/>
+    <line x1="400" y1="318" x2="400" y2="356"/><line x1="425" y1="318" x2="425" y2="340"/>
+    <line x1="450" y1="318" x2="450" y2="356"/>
+  </g>
+  <rect x="462" y="304" width="16" height="90" rx="4" fill="#a16207"/>
+  <!-- carcasa -->
+  <circle cx="205" cy="256" r="150" fill="#fbbf24" stroke="#92400e" stroke-width="10"/>
+  <circle cx="205" cy="256" r="108" fill="#f59e0b"/>
+  <circle cx="205" cy="256" r="46" fill="#fff7ed" stroke="#92400e" stroke-width="8"/>
+  <circle cx="205" cy="256" r="12" fill="#92400e"/>
+  <rect x="115" y="380" width="70" height="26" rx="10" fill="#92400e"/>
+</svg>

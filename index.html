@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>antropometria</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f766e">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="antropometria">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+:root{
+  --bg:#f6f7f9;--card:#fff;--ink:#17202a;--mut:#5b6673;--line:#e2e6eb;
+  --acc:#0f766e;--acc2:#e6f4f2;--warn:#b45309;--warnbg:#fff4e0;--bad:#b91c1c;--badbg:#fdecec;--ok:#15803d;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1418;--card:#171e24;--ink:#e8edf2;--mut:#9aa6b2;--line:#2a333c;
+  --acc:#2dd4bf;--acc2:#12312e;--warn:#fbbf24;--warnbg:#3a2a0c;--bad:#f87171;--badbg:#3a1414;--ok:#4ade80;}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:8px;padding:10px 14px}
+.top h1{font-size:17px;margin:0;flex:1}
+.top small{color:var(--mut)}
+nav{display:flex;overflow-x:auto;gap:2px;padding:0 8px}
+nav button{flex:none;border:0;background:none;color:var(--mut);padding:9px 12px;font:inherit;font-weight:600;border-bottom:3px solid transparent;cursor:pointer}
+nav button.on{color:var(--acc);border-bottom-color:var(--acc)}
+main{max-width:860px;margin:0 auto;padding:12px 12px 80px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 10px;color:var(--acc);text-transform:uppercase;letter-spacing:.04em}
+.card h3{font-size:14px;margin:14px 0 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+label.f{display:flex;flex-direction:column;font-size:13px;color:var(--mut);gap:3px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);border-color:transparent}
+.mrow{display:grid;grid-template-columns:minmax(110px,1.4fr) repeat(3,minmax(54px,.8fr)) minmax(62px,.8fr);gap:6px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow .nm{font-size:14px}.mrow .nm small{display:block;color:var(--mut);font-size:11.5px}
+.mrow input{padding:7px 4px;text-align:center}
+.mrow .res{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.mhead{font-size:11px;color:var(--mut);text-transform:uppercase;border-bottom:1px solid var(--line)}
+.mhead div:not(:first-child){text-align:center}
+.need3 input.m3{border-color:var(--warn);background:var(--warnbg)}
+.need3 .nm::after{content:" ⚠ tomar 3ª";color:var(--warn);font-size:11px;font-weight:700}
+.btn{border:0;border-radius:9px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;background:var(--acc);color:#fff}
+@media (prefers-color-scheme:dark){.btn{color:#062b27}}
+.btn.sec{background:var(--acc2);color:var(--acc)}
+.btn.dng{background:var(--badbg);color:var(--bad)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px}
+.kpi .l{font-size:12px;color:var(--mut)}
+.kpi .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:11.5px;color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{font-size:12px;color:var(--mut);font-weight:600}
+.note{font-size:12.5px;color:var(--mut)}
+.alert{border-radius:9px;padding:9px 11px;font-size:13px;margin:8px 0}
+.alert.w{background:var(--warnbg);color:var(--warn)}
+.alert.i{background:var(--acc2);color:var(--acc)}
+.tog{display:flex;align-items:center;gap:8px;font-weight:600}
+.tog input{width:auto}
+.hidden{display:none!important}
+svg text{fill:var(--mut);font-size:11px}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--acc2);color:var(--acc);font-weight:700;font-size:13px}
+.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal .card{max-width:560px;width:100%;max-height:85vh;overflow:auto}
+details summary{cursor:pointer;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:99px;padding:6px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.gcard{display:grid;grid-template-columns:118px 1fr;gap:12px;align-items:start}
+.gcard svg.fig{width:118px;height:auto;background:var(--bg);border-radius:10px}
+.gcard h3{margin:0 0 4px;font-size:15px}
+.gcard .tag{font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.04em}
+.gcard p{margin:4px 0;font-size:13.5px}
+.gcard p b{color:var(--ink)}
+.qbtn{border:1px solid var(--line);background:var(--acc2);color:var(--acc);border-radius:99px;width:22px;height:22px;font-weight:800;font-size:12px;cursor:pointer;margin-left:4px;padding:0;line-height:1;vertical-align:middle}
+.mrow .nm{display:block}
+details p,details li{font-size:13.5px}
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><h1>antropometria</h1><small id="who">Nueva evaluación</small></div>
+  <nav id="tabs">
+    <button data-t="datos" class="on">Evaluado</button>
+    <button data-t="med">Mediciones</button>
+    <button data-t="res">Resultados</button>
+    <button data-t="bia">BIA vs Antropo</button>
+    <button data-t="guia">Guía</button>
+    <button data-t="hist">Historial</button>
+    <button data-t="info">Info</button>
+  </nav>
+</header>
+<main>
+
+<!-- DATOS -->
+<section id="s-datos" class="on">
+  <div class="card">
+    <h2>Datos del evaluado</h2>
+    <div class="grid">
+      <label class="f">Nombre / código<input id="d-nombre" data-d="nombre"></label>
+      <label class="f">Fecha<input type="date" id="d-fecha" data-d="fecha"></label>
+      <label class="f">Sexo<select data-d="sexo"><option value="M">Masculino</option><option value="F">Femenino</option></select></label>
+      <label class="f">Edad (años)<input type="number" inputmode="decimal" data-d="edad"></label>
+      <label class="f">Etnia (ecuación de Lee)<select data-d="etnia">
+        <option value="0">Caucásica / hispana</option><option value="-2">Asiática</option><option value="1.1">Afrodescendiente</option></select></label>
+      <label class="f">Deporte / condición<input data-d="deporte"></label>
+    </div>
+    <label class="f" style="margin-top:10px">Notas<textarea rows="2" data-d="notas"></textarea></label>
+    <div style="margin-top:12px" class="tog"><input type="checkbox" id="full" data-d="full"><label for="full">Perfil completo (habilita fraccionamiento de 5 componentes de Kerr)</label></div>
+  </div>
+  <div class="card">
+    <h2>Profesional (aparece en el PDF)</h2>
+    <div class="grid">
+      <label class="f">Nombre<input data-p="nombre"></label>
+      <label class="f">Profesión / título<input data-p="titulo" placeholder="Kinesiólogo"></label>
+      <label class="f">Acreditación ISAK<input data-p="isak" placeholder="Nivel 2"></label>
+      <label class="f">Centro / institución<input data-p="centro"></label>
+      <label class="f">Contacto<input data-p="contacto" placeholder="correo o teléfono"></label>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <label class="f" style="flex:1;min-width:180px">Logo (opcional)<input type="file" accept="image/*" onchange="cargarLogo(this.files[0])"></label>
+      <img id="logoprev" alt="" style="max-height:44px;max-width:120px;display:none;border-radius:6px">
+      <button class="btn dng" id="logodel" style="display:none" onclick="quitarLogo()">Quitar logo</button>
+    </div>
+    <p class="note">Se guarda en este dispositivo y se usa en todos los informes.</p>
+  </div>
+  <div class="btns">
+    <button class="btn" onclick="go('med')">Ir a mediciones →</button>
+    <button class="btn sec" onclick="nuevo()">Nueva evaluación</button>
+  </div>
+</section>
+
+<!-- MEDICIONES -->
+<section id="s-med">
+  <div class="alert i">Ingresa 2 tomas por sitio. Si difieren &gt;5 % (pliegues) o &gt;1 % (resto) se marca para una 3ª toma. Valor final: media de 2 o mediana de 3.</div>
+  <div id="medwrap"></div>
+  <div class="btns"><button class="btn" onclick="go('res')">Ver resultados →</button></div>
+</section>
+
+<!-- RESULTADOS -->
+<section id="s-res"><div id="reswrap"></div></section>
+
+<!-- BIA -->
+<section id="s-bia">
+  <div class="card">
+    <h2>Datos de tu bioimpedancia</h2>
+    <p class="note">Ingresa lo que entregue tu balanza en la misma sesión (idealmente en ayunas, vejiga vacía, sin ejercicio previo, mismo horario).</p>
+    <div class="grid">
+      <label class="f">% grasa BIA<input type="number" inputmode="decimal" data-b="pg"></label>
+      <label class="f">Masa grasa BIA (kg)<input type="number" inputmode="decimal" data-b="mg"></label>
+      <label class="f">Masa muscular BIA (kg)<input type="number" inputmode="decimal" data-b="mm"></label>
+      <label class="f">Tipo de "masa muscular" que reporta<select data-b="tipo">
+        <option value="mme">Músculo esquelético (SMM)</option><option value="mbl">Masa magra blanda / "muscle mass"</option><option value="mlg">Masa libre de grasa</option></select></label>
+      <label class="f">Agua corporal total (L)<input type="number" inputmode="decimal" data-b="act"></label>
+      <label class="f">Ángulo de fase (°)<input type="number" inputmode="decimal" data-b="af"></label>
+      <label class="f">Ecuación antropométrica de referencia<select data-b="eq">
+        <option value="auto">Automática (edad/sexo)</option><option value="dw">Durnin & Womersley</option><option value="wi">Withers (hombres deportistas)</option><option value="sl">Slaughter (8–18 años)</option></select></label>
+    </div>
+  </div>
+  <div id="biawrap"></div>
+</section>
+
+<!-- GUIA -->
+<section id="s-guia">
+  <div class="chips" id="gchips"></div>
+  <div id="guiawrap"></div>
+</section>
+
+<!-- HISTORIAL -->
+<section id="s-hist">
+  <div class="card">
+    <h2>Guardar</h2>
+    <div class="btns">
+      <button class="btn" onclick="guardar()">Guardar evaluación actual</button>
+      <button class="btn sec" onclick="nuevo()">Nueva evaluación</button>
+    </div>
+    <p class="note">Los datos se guardan solo en este navegador/dispositivo. Descarga un respaldo periódicamente (o cópialo a tus notas/correo): si se borran los datos del navegador o cambias de teléfono, se pierden.</p>
+  </div>
+  <div class="card"><h2>Evaluaciones guardadas</h2><div id="histlist"></div></div>
+  <div class="card"><h2>Evolución por evaluado</h2><div id="evo"></div></div>
+  <div class="card">
+    <h2>Respaldo / exportar</h2>
+    <div class="btns">
+      <button class="btn" onclick="descargar('json')">Descargar respaldo (JSON)</button>
+      <button class="btn" onclick="descargar('csv')">Descargar tabla (CSV)</button>
+      <button class="btn sec" onclick="copiar('json')">Copiar respaldo (JSON)</button>
+      <button class="btn sec" onclick="copiar('csv')">Copiar tabla (CSV para Excel)</button>
+      <button class="btn sec" onclick="importar()">Importar respaldo</button>
+    </div>
+    <p class="note" id="copymsg"></p>
+  </div>
+</section>
+
+<!-- INFO -->
+<section id="s-info">
+  <div class="card">
+    <h2>Fórmulas y respaldo</h2>
+    <details open><summary>Criterios de medición ISAK</summary>
+      <ul>
+        <li>Lado derecho, sujeto en posición anatómica; marcas antes de medir.</li>
+        <li>Pliegues en mm, perímetros y diámetros en cm, masa en kg.</li>
+        <li>3ª toma si la diferencia entre 2 tomas supera 5 % (pliegues) o 1 % (resto). Valor final = media (2) o mediana (3).</li>
+        <li>ETM objetivo: Nivel 1 ≤7,5 % pliegues / ≤1,5 % resto; Nivel 2+ ≤5 % / ≤1 %.</li>
+      </ul></details>
+    <details><summary>Somatotipo Heath-Carter</summary>
+      <ul>
+        <li>Endo = −0,7182 + 0,1451X − 0,00068X² + 0,0000014X³; X = (tríceps + subescapular + supraespinal)·(170,18/talla).</li>
+        <li>Meso = 0,858·húmero + 0,601·fémur + 0,188·(brazo flex − tríceps/10) + 0,161·(pantorrilla − pliegue pantorrilla/10) − 0,131·talla + 4,5.</li>
+        <li>Ecto con IP = talla/∛masa: ≥40,75 → 0,732·IP − 28,58; 38,25–40,75 → 0,463·IP − 17,63; ≤38,25 → 0,1.</li>
+        <li>Somatocarta: X = ecto − endo; Y = 2·meso − (endo + ecto).</li>
+      </ul></details>
+    <details><summary>% grasa (Durnin & Womersley 1974 + Siri)</summary>
+      <p>Densidad = c − m·log₁₀(Σ bíceps + tríceps + subescapular + cresta ilíaca), coeficientes por sexo y edad. %G = (4,95/D − 4,50)·100. Ecuación de 2 componentes con error típico ~3–5 % de grasa: úsala como referencia; para seguimiento, ISAK recomienda informar Σ6/Σ8 pliegues en mm.</p></details>
+    <details><summary>Withers et al. 1987 (hombres deportistas)</summary>
+      <p>D = 1,0988 − 0,0004·Σ7 (tríceps, subescapular, bíceps, supraespinal, abdominal, muslo, pantorrilla); %G por Siri. Derivada en 207 deportistas australianos de 18 disciplinas con pesaje hidrostático. La versión femenina incluye perímetros y talla, por eso no se incluye aquí.</p></details>
+    <details><summary>Slaughter et al. 1988 (8–18 años)</summary>
+      <p>Niños: %G = 0,735·(tríceps + pantorrilla) + 1,0. Niñas: %G = 0,610·(tríceps + pantorrilla) + 5,1. Basada en un modelo multicomponente (densidad, agua y mineral óseo), lo que corrige la menor densidad de la MLG antes de la maduración. Validaciones cruzadas muestran sesgo según maduración: interprétala con cautela en púberes.</p></details>
+    <details><summary>Masa muscular esquelética (Lee et al. 2000)</summary>
+      <p>MME (kg) = Talla(m)·(0,00744·PBC² + 0,00088·PMC² + 0,00441·PPC²) + 2,4·sexo − 0,048·edad + etnia + 7,8. Perímetros corregidos = perímetro − π·pliegue(cm) en brazo relajado, muslo medio y pantorrilla. Validada contra RM (R² ≈ 0,91; EEE ≈ 2,2 kg) en adultos no obesos.</p></details>
+    <details><summary>5 componentes (Kerr 1988)</summary>
+      <p>Estrategia Phantom (Ross & Wilson) para masa de piel, adiposa, muscular, ósea y residual. Validada en disección de cadáveres; la suma debería quedar dentro de ±5 % de la masa real. Requiere perfil completo. Se muestran masas brutas y ajustadas proporcionalmente a la masa real.</p></details>
+    <details><summary>Sobre comparar con tu BIA</summary>
+      <p>Un r = 0,986 con DXA indica asociación, no concordancia: dos métodos pueden correlacionar muy alto y aun así diferir sistemáticamente varios kg. La concordancia se evalúa con Bland-Altman (sesgo y límites de acuerdo ±1,96 DE). Además, DXA no es un "gold standard" absoluto y la BIA depende de la hidratación, ingesta, ejercicio previo y ciclo menstrual. Lo útil clínicamente es mirar si ambos métodos detectan la misma dirección de cambio en el tiempo.</p></details>
+    <p class="note">Verifica los coeficientes con tu manual ISAK antes de uso clínico o publicación.</p>
+  </div>
+</section>
+</main>
+
+<div id="modal" class="modal hidden"><div class="card" id="modalc"></div></div>
+
+<script>
+/* ---------- Definición de mediciones ---------- */
+const GROUPS=[
+ {k:'basic',t:'Básicas'},{k:'skin',t:'Pliegues cutáneos (mm)'},
+ {k:'girth',t:'Perímetros (cm)'},{k:'br',t:'Diámetros (cm)'}];
+const M=[
+ {id:'masa',g:'basic',n:'Masa corporal',u:'kg'},
+ {id:'talla',g:'basic',n:'Talla',u:'cm'},
+ {id:'tsent',g:'basic',n:'Talla sentado',u:'cm',o:1},
+ {id:'enver',g:'basic',n:'Envergadura',u:'cm',o:1},
+ {id:'ptri',g:'skin',n:'Tríceps'},
+ {id:'psub',g:'skin',n:'Subescapular'},
+ {id:'pbic',g:'skin',n:'Bíceps'},
+ {id:'pcre',g:'skin',n:'Cresta ilíaca'},
+ {id:'psup',g:'skin',n:'Supraespinal'},
+ {id:'pabd',g:'skin',n:'Abdominal'},
+ {id:'pmus',g:'skin',n:'Muslo frontal'},
+ {id:'ppan',g:'skin',n:'Pantorrilla medial'},
+ {id:'cbrr',g:'girth',n:'Brazo relajado'},
+ {id:'cbrf',g:'girth',n:'Brazo flexionado y contraído'},
+ {id:'ccin',g:'girth',n:'Cintura (mínima)'},
+ {id:'ccad',g:'girth',n:'Cadera (glúteo máximo)'},
+ {id:'cmum',g:'girth',n:'Muslo medio',s:'para masa muscular de Lee',o:1},
+ {id:'cpan',g:'girth',n:'Pantorrilla máxima'},
+ {id:'ccab',g:'girth',n:'Cabeza',f:1},
+ {id:'cant',g:'girth',n:'Antebrazo máximo',f:1},
+ {id:'ctor',g:'girth',n:'Tórax mesoesternal',f:1},
+ {id:'cmu1',g:'girth',n:'Muslo 1 cm pliegue glúteo',f:1},
+ {id:'dhum',g:'br',n:'Húmero (biepicondilar)'},
+ {id:'dfem',g:'br',n:'Fémur (biepicondilar)'},
+ {id:'dbie',g:'br',n:'Biestiloideo (muñeca)',o:1},
+ {id:'dbac',g:'br',n:'Biacromial',f:1},
+ {id:'dbil',g:'br',n:'Biileocrestal',f:1},
+ {id:'dttr',g:'br',n:'Tórax transverso',f:1},
+ {id:'dtap',g:'br',n:'Tórax anteroposterior',f:1}
+];
+const BYID=Object.fromEntries(M.map(m=>[m.id,m]));
+
+/* ---------- Estado ---------- */
+const KEY='isak_app_v1';
+function blank(){return{id:null,datos:{fecha:new Date().toISOString().slice(0,10),sexo:'M',etnia:'0',full:false},med:{},bia:{tipo:'mme',eq:'auto'}}}
+let S=blank(), DB={evals:[]};
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x){DB=x.db||DB;if(x.draft)S=x.draft;}}catch(e){}DB.prof=DB.prof||{};}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({db:DB,draft:S}))}catch(e){}}
+
+/* ---------- Utilidades ---------- */
+const $=s=>document.querySelector(s);
+const num=v=>{if(v===''||v==null)return null;const n=parseFloat(String(v).replace(',','.'));return isFinite(n)?n:null};
+const f=(v,d=1)=>v==null||!isFinite(v)?'—':v.toLocaleString('es-CL',{minimumFractionDigits:d,maximumFractionDigits:d});
+function val(id){
+  const a=(S.med[id]||[]).map(num);const [x,y,z]=a;
+  if(x!=null&&y!=null&&z!=null){return [x,y,z].sort((p,q)=>p-q)[1]}
+  if(x!=null&&y!=null)return (x+y)/2;
+  if(x!=null)return x; return null;
+}
+function need3(id){
+  const a=(S.med[id]||[]).map(num);const [x,y,z]=a;
+  if(x==null||y==null||z!=null)return false;
+  const tol=BYID[id].g==='skin'?0.05:0.01;
+  return Math.abs(x-y)/((x+y)/2)>tol;
+}
+
+/* ---------- Render mediciones ---------- */
+function renderMed(){
+  const full=!!S.datos.full;let h='';
+  for(const G of GROUPS){
+    const ms=M.filter(m=>m.g===G.k&&(!m.f||full));
+    h+=`<div class="card"><h2>${G.t}</h2><div class="mrow mhead"><div>Sitio</div><div>1ª</div><div>2ª</div><div>3ª</div><div style="text-align:right">Final</div></div>`;
+    for(const m of ms){
+      const a=S.med[m.id]||[];
+      const sub=m.s||(m.f?'perfil completo':m.o?'opcional':'');
+      h+=`<div class="mrow" id="r-${m.id}"><div class="nm">${m.n}${m.u?' ('+m.u+')':''}${GBY[m.id]?`<button class="qbtn" title="Cómo medir" onclick="verGuia('${m.id}')">?</button>`:''}${sub?`<small>${sub}</small>`:''}</div>`+
+      [0,1,2].map(i=>`<input class="m${i+1}" type="number" inputmode="decimal" step="0.1" data-m="${m.id}" data-i="${i}" value="${a[i]??''}">`).join('')+
+      `<div class="res" id="v-${m.id}">—</div></div>`;
+    }
+    h+='</div>';
+  }
+  $('#medwrap').innerHTML=h;
+  updMed();
+}
+function updMed(){
+  for(const m of M){const r=$('#r-'+m.id);if(!r)continue;
+    r.classList.toggle('need3',need3(m.id));
+    $('#v-'+m.id).textContent=f(val(m.id),1);}
+}
+
+/* ---------- Cálculos ---------- */
+function calc(){
+  const d=S.datos,v=id=>val(id);
+  const W=v('masa'),H=v('talla'),sexo=d.sexo,edad=num(d.edad);
+  const R={warn:[]};
+  const hm=H?H/100:null;
+  R.imc=W&&H?W/(hm*hm):null;
+  R.icc=v('ccin')&&v('ccad')?v('ccin')/v('ccad'):null;
+  R.ict=v('ccin')&&H?v('ccin')/H:null;
+  R.icormico=v('tsent')&&H?v('tsent')/H*100:null;
+  R.enverRel=v('enver')&&H?v('enver')/H:null;
+  const s6=['ptri','psub','psup','pabd','pmus','ppan'],s8=[...s6,'pbic','pcre'];
+  const sum=a=>a.every(k=>v(k)!=null)?a.reduce((p,k)=>p+v(k),0):null;
+  R.s6=sum(s6);R.s8=sum(s8);
+  // Perímetros corregidos (cm) — pliegue en mm/10·π
+  const corr=(c,p)=>v(c)!=null&&v(p)!=null?v(c)-Math.PI*v(p)/10:null;
+  R.pcBrazo=corr('cbrr','ptri');R.pcMuslo=corr('cmum','pmus');R.pcPan=corr('cpan','ppan');R.pcCin=corr('ccin','pabd');
+  R.amb=R.pcBrazo!=null?R.pcBrazo**2/(4*Math.PI):null; // área muscular brazo (cm²)
+  // Somatotipo
+  if(v('ptri')!=null&&v('psub')!=null&&v('psup')!=null&&H){
+    const X=(v('ptri')+v('psub')+v('psup'))*(170.18/H);
+    R.endo=-0.7182+0.1451*X-0.00068*X*X+0.0000014*X**3;
+  }
+  if([ 'dhum','dfem','cbrf','cpan','ptri','ppan'].every(k=>v(k)!=null)&&H){
+    R.meso=0.858*v('dhum')+0.601*v('dfem')+0.188*(v('cbrf')-v('ptri')/10)+0.161*(v('cpan')-v('ppan')/10)-0.131*H+4.5;
+  }
+  if(W&&H){const hwr=H/Math.cbrt(W);R.hwr=hwr;
+    R.ecto=hwr>=40.75?0.732*hwr-28.58:hwr>38.25?0.463*hwr-17.63:0.1;}
+  if(R.endo!=null&&R.meso!=null&&R.ecto!=null){
+    for(const k of['endo','meso','ecto'])if(R[k]<0.1)R[k]=0.1;
+    R.sx=R.ecto-R.endo;R.sy=2*R.meso-(R.endo+R.ecto);R.sclass=somClass(R.endo,R.meso,R.ecto);
+  }
+  // Durnin & Womersley
+  const s4=['pbic','ptri','psub','pcre'];
+  if(s4.every(k=>v(k)!=null)&&edad!=null){
+    const S4=s4.reduce((p,k)=>p+v(k),0);R.s4=S4;
+    const M_=[[19,1.1620,0.0630],[29,1.1631,0.0632],[39,1.1422,0.0544],[49,1.1620,0.0700],[999,1.1715,0.0779]];
+    const F_=[[19,1.1549,0.0678],[29,1.1599,0.0717],[39,1.1423,0.0632],[49,1.1333,0.0612],[999,1.1339,0.0645]];
+    const t=(sexo==='F'?F_:M_).find(r=>edad<=r[0]);
+    R.dens=t[1]-t[2]*Math.log10(S4);
+    R.pgDW=(4.95/R.dens-4.50)*100;
+    if(W){R.mgDW=W*R.pgDW/100;R.mlgDW=W-R.mgDW;}
+    if(edad<16)R.warn.push('Durnin & Womersley no está validada en menores de 16 años.');
+  }
+  // Withers et al. 1987 (hombres deportistas): D = 1.0988 − 0.0004·Σ7
+  const s7=['ptri','psub','pbic','psup','pabd','pmus','ppan'];
+  if(sexo==='M'&&s7.every(k=>v(k)!=null)){
+    const D=1.0988-0.0004*s7.reduce((p,k)=>p+v(k),0);R.densWi=D;R.pgWi=(4.95/D-4.50)*100;
+  }
+  // Slaughter et al. 1988 (8–18 años): tríceps + pantorrilla
+  if(v('ptri')!=null&&v('ppan')!=null&&edad!=null&&edad>=8&&edad<=18){
+    const s=v('ptri')+v('ppan');R.pgSl=sexo==='M'?0.735*s+1.0:0.610*s+5.1;
+  }
+  // Ecuación de referencia
+  const eq=S.bia.eq||'auto';
+  R.eqRef=eq==='auto'?(edad!=null&&edad<=18&&R.pgSl!=null?'sl':'dw'):eq;
+  R.pgRef=R.eqRef==='sl'?R.pgSl:R.eqRef==='wi'?R.pgWi:R.pgDW;
+  R.eqName={dw:'Durnin & Womersley',wi:'Withers',sl:'Slaughter'}[R.eqRef];
+  if(W&&R.pgRef!=null){R.mgRef=W*R.pgRef/100;R.mlgRef=W-R.mgRef;}
+  // Lee 2000
+  if(R.pcBrazo!=null&&R.pcMuslo!=null&&R.pcPan!=null&&H&&edad!=null){
+    R.mmeLee=hm*(0.00744*R.pcBrazo**2+0.00088*R.pcMuslo**2+0.00441*R.pcPan**2)+2.4*(sexo==='M'?1:0)-0.048*edad+(num(d.etnia)||0)+7.8;
+    if(W)R.mmePct=R.mmeLee/W*100;
+  }
+  // Kerr 5 componentes
+  if(d.full&&W&&H){
+    const need=['ptri','psub','psup','pabd','pmus','ppan','cbrr','cant','cmu1','cpan','ctor','ccin','ccab','dbac','dbil','dhum','dfem','dttr','dtap'];
+    const miss=need.filter(k=>v(k)==null);
+    if(miss.length===0){
+      const P=170.18/H,P3=P**3;
+      const SA=(sexo==='F'?73.074:68.308)*W**0.425*H**0.725/10000;
+      const piel=SA*(sexo==='F'?1.96:2.07)*1.05;
+      const sum6=s6.reduce((p,k)=>p+v(k),0);
+      const zA=(sum6*P-116.41)/34.79, adip=(zA*5.85+25.6)/P3;
+      const sm=(v('cbrr')-Math.PI*v('ptri')/10)+v('cant')+(v('cmu1')-Math.PI*v('pmus')/10)+(v('cpan')-Math.PI*v('ppan')/10)+(v('ctor')-Math.PI*v('psub')/10);
+      const zM=(sm*P-207.21)/13.74, musc=(zM*5.4+24.5)/P3;
+      const sr=v('dttr')+v('dtap')+(v('ccin')-Math.PI*v('pabd')/10);
+      const zR=(sr*P-109.35)/7.08, resid=(zR*1.24+6.1)/P3;
+      const zH=(v('ccab')-56)/1.44, hueCab=zH*0.18+1.20;
+      const sb=v('dbac')+v('dbil')+2*v('dhum')+2*v('dfem');
+      const zB=(sb*P-98.88)/5.33, hueCue=(zB*1.34+6.7)/P3;
+      const hueso=hueCab+hueCue;
+      const tot=piel+adip+musc+resid+hueso;
+      R.kerr={piel,adip,musc,resid,hueso,tot,dif:(tot-W)/W*100,k:W/tot,imo:musc/hueso};
+    } else R.kerrMiss=miss.map(k=>BYID[k].n);
+  }
+  return R;
+}
+function somClass(en,me,ec){
+  const c={endo:en,meso:me,ecto:ec};const ks=Object.keys(c).sort((a,b)=>c[b]-c[a]);
+  const eq=(a,b)=>Math.abs(c[a]-c[b])<=0.5;
+  const N={endo:'Endomorfo',meso:'Mesomorfo',ecto:'Ectomorfo'},A={endo:'endomórfico',meso:'mesomórfico',ecto:'ectomórfico'};
+  if(c[ks[0]]-c[ks[2]]<1)return 'Central';
+  const [a,b,z]=ks;
+  if(eq(a,b))return `${N[a]}-${N[b].toLowerCase()}`;
+  if(eq(b,z))return `${N[a]} balanceado`;
+  return `${N[a]} ${A[b]}`;
+}
+
+/* ---------- Render resultados ---------- */
+function kpi(l,v,s=''){return`<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`}
+function imcCat(b){if(b==null)return'';return b<18.5?'Bajo peso':b<25?'Normal':b<30?'Sobrepeso':'Obesidad'}
+function renderRes(){
+  const R=calc(),v=val;let h='';
+  if(R.warn.length)h+=R.warn.map(w=>`<div class="alert w">${w}</div>`).join('');
+  const n3=M.filter(m=>need3(m.id)).map(m=>m.n);
+  if(n3.length)h+=`<div class="alert w">Falta 3ª toma en: ${n3.join(', ')}.</div>`;
+  h+=`<div class="card"><h2>Resumen</h2><div class="kpis">
+    ${kpi('Σ6 pliegues',f(R.s6,1)+' mm','tri, sub, supra, abd, muslo, pant.')}
+    ${kpi('Σ8 pliegues',f(R.s8,1)+' mm','Σ6 + bíceps + cresta')}
+    ${kpi('IMC',f(R.imc,1),imcCat(R.imc))}
+    ${kpi('Cintura / talla',f(R.ict,2),R.ict!=null?(R.ict>=0.5?'≥0,5 riesgo cardiometabólico':'<0,5'):'')}
+    ${kpi('Cintura / cadera',f(R.icc,2),R.icc!=null?((S.datos.sexo==='F'?R.icc>0.85:R.icc>0.90)?'Sobre punto de corte OMS':'Bajo punto de corte OMS'):'')}
+    ${kpi('Área muscular brazo',f(R.amb,1)+' cm²','corregida por tríceps')}
+  </div></div>`;
+  // Somatotipo
+  h+=`<div class="card"><h2>Somatotipo Heath-Carter</h2>`;
+  if(R.sx!=null){
+    h+=`<div class="kpis">${kpi('Endomorfia',f(R.endo,1))}${kpi('Mesomorfia',f(R.meso,1))}${kpi('Ectomorfia',f(R.ecto,1),'IP '+f(R.hwr,2))}</div>
+    <p style="margin:10px 0 4px"><span class="pill">${f(R.endo,1)} – ${f(R.meso,1)} – ${f(R.ecto,1)}</span> &nbsp;<b>${R.sclass}</b></p>
+    ${somatochart(R)}<p class="note">X = ${f(R.sx,2)} · Y = ${f(R.sy,2)}. Puntos grises: evaluaciones previas guardadas del mismo evaluado.</p>`;
+  } else h+=`<p class="note">Requiere: masa, talla, pliegues tríceps, subescapular, supraespinal y pantorrilla; perímetros brazo flexionado y pantorrilla; diámetros húmero y fémur.</p>`;
+  h+='</div>';
+  // Composición
+  h+=`<div class="card"><h2>Composición corporal (2 componentes)</h2><table>
+    <tr><th>Método</th><th>Valor</th><th>kg</th></tr>
+    ${(()=>{const W=val('masa'),kg=p=>p!=null&&W?W*p/100:null,mk=k=>R.eqRef===k?' style="background:var(--acc2)"':'';
+      return `<tr${mk('dw')}><td>% grasa Durnin & Womersley + Siri<br><small class="note">adultos 16–72 a · Σ4 (bíc, tríc, subesc, cresta)</small></td><td>${f(R.pgDW,1)} %</td><td>${f(kg(R.pgDW),1)}</td></tr>
+      <tr${mk('wi')}><td>% grasa Withers 1987 + Siri<br><small class="note">hombres deportistas · Σ7</small></td><td>${f(R.pgWi,1)} %</td><td>${f(kg(R.pgWi),1)}</td></tr>
+      <tr${mk('sl')}><td>% grasa Slaughter 1988<br><small class="note">8–18 años · tríceps + pantorrilla</small></td><td>${f(R.pgSl,1)} %</td><td>${f(kg(R.pgSl),1)}</td></tr>
+      <tr><td>Masa libre de grasa (${R.eqName})</td><td></td><td>${f(R.mlgRef,1)}</td></tr>`})()}
+    <tr><td>Masa muscular esquelética (Lee 2000)<br><small class="note">adultos · RM como criterio</small></td><td>${f(R.mmePct,1)} %</td><td>${f(R.mmeLee,1)}</td></tr>
+  </table><p class="note">Fila destacada = ecuación de referencia usada en la comparación con BIA (se elige sola según edad/sexo o en la pestaña BIA). Densidad D&W: ${f(R.dens,4)} g/cm³ (Σ4 = ${f(R.s4,1)} mm).</p></div>`;
+  // Kerr
+  if(S.datos.full){
+    h+=`<div class="card"><h2>Fraccionamiento 5 componentes (Kerr 1988)</h2>`;
+    if(R.kerr){const K=R.kerr,W=v('masa');
+      const row=(n,x)=>`<tr><td>${n}</td><td>${f(x,1)}</td><td>${f(x/K.tot*100,1)} %</td><td>${f(x*K.k,1)}</td></tr>`;
+      h+=`<table><tr><th>Tejido</th><th>kg (bruto)</th><th>%</th><th>kg ajustado</th></tr>
+      ${row('Piel',K.piel)}${row('Adiposo',K.adip)}${row('Muscular',K.musc)}${row('Óseo',K.hueso)}${row('Residual',K.resid)}
+      <tr><td><b>Suma</b></td><td><b>${f(K.tot,1)}</b></td><td></td><td><b>${f(W,1)}</b></td></tr></table>
+      <p style="margin:8px 0 0">Diferencia vs masa real: <b style="color:${Math.abs(K.dif)<=5?'var(--ok)':'var(--bad)'}">${f(K.dif,1)} %</b> ${Math.abs(K.dif)<=5?'(aceptable ±5 %)':'(fuera de ±5 %: revisar mediciones)'} · Índice músculo/óseo: <b>${f(K.imo,2)}</b></p>`;
+    } else h+=`<p class="note">Faltan: ${(R.kerrMiss||['masa','talla']).join(', ')}.</p>`;
+    h+='</div>';
+  }
+  // Índices
+  h+=`<div class="card"><h2>Proporcionalidad</h2><table>
+    <tr><td>Índice córmico (talla sentado/talla)</td><td>${f(R.icormico,1)}</td></tr>
+    <tr><td>Envergadura relativa</td><td>${f(R.enverRel,3)}</td></tr>
+    <tr><td>Perímetro corregido brazo</td><td>${f(R.pcBrazo,1)} cm</td></tr>
+    <tr><td>Perímetro corregido muslo medio</td><td>${f(R.pcMuslo,1)} cm</td></tr>
+    <tr><td>Perímetro corregido pantorrilla</td><td>${f(R.pcPan,1)} cm</td></tr>
+    <tr><td>Perímetro corregido cintura</td><td>${f(R.pcCin,1)} cm</td></tr>
+  </table></div>`;
+  h+=`<div class="btns"><button class="btn" onclick="pdfActual()">Descargar informe PDF</button><button class="btn sec" onclick="guardar()">Guardar evaluación</button><button class="btn sec" onclick="go('bia')">Comparar con BIA →</button></div>`;
+  $('#reswrap').innerHTML=h;
+}
+function somatochart(R){
+  const sx=19,sy=sx/Math.sqrt(3),x0=-9,x1=9,y0=-10,y1=16;
+  const Wd=(x1-x0)*sx,Ht=(y1-y0)*sy;
+  const X=x=>(x-x0)*sx,Y=y=>(y1-y)*sy;
+  const vE=[-7,-7],vM=[0,14],vC=[7,-7];
+  const q=(a,b,cx,cy)=>`M${X(a[0])},${Y(a[1])} Q${X(cx)},${Y(cy)} ${X(b[0])},${Y(b[1])}`;
+  let g=`<svg viewBox="0 0 ${Wd} ${Ht}" style="width:100%;max-width:420px;display:block;margin:6px auto">`;
+  for(let x=-8;x<=8;x+=2)g+=`<line x1="${X(x)}" y1="0" x2="${X(x)}" y2="${Ht}" stroke="var(--line)"/>`;
+  for(let y=-10;y<=16;y+=2)g+=`<line x1="0" y1="${Y(y)}" x2="${Wd}" y2="${Y(y)}" stroke="var(--line)"/>`;
+  g+=`<path d="${q(vE,vM,-6.2,5.5)} ${q(vM,vC,6.2,5.5).replace('M','L')} ${q(vC,vE,0,-10).replace('M','L')}" fill="none" stroke="var(--mut)" stroke-width="1.3"/>`;
+  for(const p of[vE,vM,vC])g+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(p[0])}" y2="${Y(p[1])}" stroke="var(--mut)" stroke-dasharray="3 3"/>`;
+  g+=`<text x="${X(-7.6)}" y="${Y(-8.4)}">ENDO</text><text x="${X(0.4)}" y="${Y(15)}">MESO</text><text x="${X(6)}" y="${Y(-8.4)}">ECTO</text>`;
+  const nm=(S.datos.nombre||'').trim().toLowerCase();
+  if(nm)DB.evals.filter(e=>e.id!==S.id&&(e.datos.nombre||'').trim().toLowerCase()===nm&&e.res&&e.res.sx!=null)
+    .forEach(e=>g+=`<circle cx="${X(e.res.sx)}" cy="${Y(e.res.sy)}" r="4.5" fill="var(--mut)" opacity=".6"/>`);
+  g+=`<circle cx="${X(R.sx)}" cy="${Y(R.sy)}" r="6.5" fill="var(--acc)" stroke="var(--card)" stroke-width="2"/></svg>`;
+  return g;
+}
+
+/* ---------- BIA vs antropometría ---------- */
+function renderBia(){
+  const R=calc(),B=S.bia,W=val('masa');let h='';
+  const pg=num(B.pg),mg=num(B.mg)??(pg!=null&&W?W*pg/100:null),mm=num(B.mm);
+  const pgB=pg??(mg!=null&&W?mg/W*100:null);
+  const row=(n,a,b,u)=>`<tr><td>${n}</td><td>${f(a,1)}${u}</td><td>${f(b,1)}${u}</td><td>${a!=null&&b!=null?(b-a>0?'+':'')+f(b-a,1)+u:'—'}</td></tr>`;
+  h+=`<div class="card"><h2>Comparación</h2><table><tr><th></th><th>Antropometría</th><th>BIA</th><th>BIA − Antropo</th></tr>
+    ${row(`% grasa (${R.eqName})`,R.pgRef,pgB,' %')}${row('Masa grasa',R.mgRef,mg,' kg')}`;
+  if(B.tipo==='mme')h+=row('Músculo esquelético (Lee vs BIA)',R.mmeLee,mm,' kg');
+  else if(B.tipo==='mlg')h+=row(`Masa libre de grasa (${R.eqName} vs BIA)`,R.mlgRef,mm,' kg');
+  else h+=`<tr><td>Masa muscular BIA (magra blanda)</td><td>—</td><td>${f(mm,1)} kg</td><td>no comparable</td></tr>`;
+  h+=`</table>`;
+  if(B.tipo==='mbl')h+=`<div class="alert w">La "masa muscular" de muchas balanzas es masa magra blanda (incluye agua, órganos), no músculo esquelético: no es comparable con Lee. Si tu equipo entrega SMM, usa esa cifra.</div>`;
+  const notes=[];
+  if(num(B.af)!=null)notes.push(`Ángulo de fase ${f(num(B.af),1)}°: indicador de integridad celular/estado nutricional; compáralo contra valores de referencia por sexo/edad y en el tiempo, más que con un punto de corte único.`);
+  if(num(B.act)!=null&&W)notes.push(`ACT ${f(num(B.act),1)} L (${f(num(B.act)/W*100,1)} % de la masa). La hidratación de la MLG (~73 %) es el supuesto que más afecta el % grasa de BIA.`);
+  h+=notes.map(n=>`<p class="note">${n}</p>`).join('');
+  h+=`<p class="note">Una diferencia puntual de 2–4 puntos de % grasa entre métodos es esperable. Para seguimiento, mira si Σ6/Σ8 y la BIA cambian en la misma dirección.</p></div>`;
+  // Concordancia histórica (Bland-Altman simple)
+  const ref=e=>e.res?(e.res.pgRef??e.res.pgDW):null;
+  const pts=DB.evals.filter(e=>ref(e)!=null&&num(e.bia?.pg)!=null).map(e=>({m:(ref(e)+num(e.bia.pg))/2,d:num(e.bia.pg)-ref(e)}));
+  h+=`<div class="card"><h2>Concordancia acumulada (Bland-Altman, % grasa)</h2>`;
+  if(pts.length>=3){
+    const md=pts.reduce((p,x)=>p+x.d,0)/pts.length,sd=Math.sqrt(pts.reduce((p,x)=>p+(x.d-md)**2,0)/(pts.length-1));
+    h+=`<p>n = ${pts.length} evaluaciones · Sesgo medio BIA − antropometría: <b>${f(md,2)} %</b> · LdA 95 %: <b>${f(md-1.96*sd,1)}</b> a <b>${f(md+1.96*sd,1)}</b> %</p>${baPlot(pts,md,sd)}`;
+  } else h+=`<p class="note">Con 3 o más evaluaciones guardadas que tengan % grasa por ambos métodos se calcula el sesgo y los límites de acuerdo entre tu BIA y la antropometría.</p>`;
+  h+='</div>';
+  $('#biawrap').innerHTML=h;
+}
+function baPlot(pts,md,sd){
+  const w=360,hh=200,p=30;const xs=pts.map(x=>x.m),lo=Math.min(...xs)-2,hi=Math.max(...xs)+2;
+  const ys=[...pts.map(x=>x.d),md+2.2*sd,md-2.2*sd],yl=Math.min(...ys,-1),yh=Math.max(...ys,1);
+  const X=x=>p+(x-lo)/(hi-lo)*(w-p-8),Y=y=>8+(yh-y)/(yh-yl)*(hh-p-8);
+  let g=`<svg viewBox="0 0 ${w} ${hh}" style="width:100%;max-width:460px">`;
+  const hl=(y,c,da)=>`<line x1="${p}" x2="${w-8}" y1="${Y(y)}" y2="${Y(y)}" stroke="${c}" ${da?'stroke-dasharray="4 3"':''}/>`;
+  g+=hl(0,'var(--line)')+hl(md,'var(--acc)')+hl(md+1.96*sd,'var(--warn)',1)+hl(md-1.96*sd,'var(--warn)',1);
+  pts.forEach(q=>g+=`<circle cx="${X(q.m)}" cy="${Y(q.d)}" r="4" fill="var(--acc)"/>`);
+  g+=`<text x="${p}" y="${hh-6}">Media de ambos métodos (% grasa)</text><text x="2" y="12">Dif.</text></svg>`;
+  return g;
+}
+
+/* ---------- Historial ---------- */
+function snapshot(){const R=calc();return{s6:R.s6,s8:R.s8,imc:R.imc,pgDW:R.pgDW,pgWi:R.pgWi,pgSl:R.pgSl,pgRef:R.pgRef,eqRef:R.eqRef,mmeLee:R.mmeLee,endo:R.endo,meso:R.meso,ecto:R.ecto,sx:R.sx,sy:R.sy,masa:val('masa'),cin:val('ccin')}}
+function guardar(){
+  if(!(S.datos.nombre||'').trim()){toast('Ingresa un nombre o código en "Evaluado" antes de guardar.');go('datos');return}
+  if(!S.id)S.id='e'+Date.now();
+  const rec=JSON.parse(JSON.stringify(S));rec.res=snapshot();
+  const i=DB.evals.findIndex(e=>e.id===S.id);if(i>=0)DB.evals[i]=rec;else DB.evals.push(rec);
+  persist();renderHist();toast('Evaluación guardada.');
+}
+function nuevo(){S=blank();persist();syncForm();renderMed();go('datos')}
+function abrir(id){const e=DB.evals.find(x=>x.id===id);if(!e)return;S=JSON.parse(JSON.stringify(e));delete S.res;persist();syncForm();renderMed();go('res')}
+function borrar(id){
+  modal(`<h2>Eliminar evaluación</h2><p>¿Seguro? Esta acción no se puede deshacer.</p><div class="btns"><button class="btn dng" id="okdel">Eliminar</button><button class="btn sec" onclick="closeM()">Cancelar</button></div>`);
+  $('#okdel').onclick=()=>{DB.evals=DB.evals.filter(e=>e.id!==id);if(S.id===id)S.id=null;persist();renderHist();closeM()};
+}
+function renderHist(){
+  const ev=[...DB.evals].sort((a,b)=>(b.datos.fecha||'').localeCompare(a.datos.fecha||''));
+  $('#histlist').innerHTML=ev.length?`<table><tr><th>Evaluado</th><th>Fecha</th><th>Σ6</th><th></th></tr>`+
+    ev.map(e=>`<tr><td>${esc(e.datos.nombre)}</td><td>${e.datos.fecha||''}</td><td>${f(e.res?.s6,1)}</td><td><button class="btn sec" style="padding:5px 9px" onclick="abrir('${e.id}')">Abrir</button> <button class="btn sec" style="padding:5px 9px" onclick="pdfDe('${e.id}')">PDF</button> <button class="btn dng" style="padding:5px 9px" onclick="borrar('${e.id}')">✕</button></td></tr>`).join('')+'</table>'
+    :'<p class="note">Aún no hay evaluaciones guardadas.</p>';
+  const by={};DB.evals.forEach(e=>{const k=(e.datos.nombre||'').trim();(by[k]=by[k]||[]).push(e)});
+  let h='';
+  for(const [k,arr] of Object.entries(by)){if(arr.length<2)continue;
+    arr.sort((a,b)=>(a.datos.fecha||'').localeCompare(b.datos.fecha||''));
+    const first=arr[0].res||{},last=arr[arr.length-1].res||{};
+    const dl=(a,b,dd=1)=>a!=null&&b!=null?((b-a>0?'+':'')+f(b-a,dd)):'—';
+    h+=`<h3>${esc(k)} (${arr.length} evaluaciones)</h3><table><tr><th>Fecha</th><th>Masa</th><th>Σ6</th><th>%G</th><th>MME Lee</th><th>Cintura</th></tr>`+
+      arr.map(e=>{const r=e.res||{};return`<tr><td>${e.datos.fecha}</td><td>${f(r.masa,1)}</td><td>${f(r.s6,1)}</td><td>${f(r.pgRef??r.pgDW,1)}</td><td>${f(r.mmeLee,1)}</td><td>${f(r.cin,1)}</td></tr>`}).join('')+
+      `<tr><td><b>Δ total</b></td><td><b>${dl(first.masa,last.masa)}</b></td><td><b>${dl(first.s6,last.s6)}</b></td><td><b>${dl(first.pgRef??first.pgDW,last.pgRef??last.pgDW)}</b></td><td><b>${dl(first.mmeLee,last.mmeLee)}</b></td><td><b>${dl(first.cin,last.cin)}</b></td></tr></table>`;
+  }
+  $('#evo').innerHTML=h||'<p class="note">Guarda 2 o más evaluaciones con el mismo nombre para ver la evolución.</p>';
+}
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toCSV(){
+  const cols=['nombre','fecha','sexo','edad',...M.map(m=>m.id),'s6','s8','imc','pgDW','mmeLee','endo','meso','ecto','bia_pg','bia_mm'];
+  const lines=[cols.join(';')];
+  for(const e of DB.evals){const sv=S;S=e;
+    const row=[e.datos.nombre,e.datos.fecha,e.datos.sexo,e.datos.edad,...M.map(m=>val(m.id)),e.res?.s6,e.res?.s8,e.res?.imc,e.res?.pgDW,e.res?.mmeLee,e.res?.endo,e.res?.meso,e.res?.ecto,e.bia?.pg,e.bia?.mm];
+    S=sv;lines.push(row.map(x=>x==null?'':typeof x==='number'?String(+x.toFixed(3)).replace('.',','):String(x).replace(/;/g,',')).join(';'));}
+  return lines.join('\n');
+}
+async function copiar(t){
+  const txt=t==='json'?JSON.stringify(DB):toCSV();
+  try{await navigator.clipboard.writeText(txt);$('#copymsg').textContent=t==='json'?'Respaldo copiado. Pégalo en tus notas o correo.':'CSV copiado. Pégalo en Excel (separador ";").'}
+  catch(e){modal(`<h2>Copia manual</h2><textarea rows="10" readonly>${esc(txt)}</textarea><div class="btns" style="margin-top:8px"><button class="btn sec" onclick="closeM()">Cerrar</button></div>`)}
+}
+function descargar(t){
+  try{const txt=t==='json'?JSON.stringify(DB):'\ufeff'+toCSV();
+    const blob=new Blob([txt],{type:t==='json'?'application/json':'text/csv;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='antropometria_'+new Date().toISOString().slice(0,10)+(t==='json'?'.json':'.csv');
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    $('#copymsg').textContent='Archivo descargado.';
+  }catch(e){copiar(t)}
+}
+function importarArchivo(file){
+  const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);let n=0;(x.evals||[]).forEach(e=>{if(e&&e.id&&e.datos){const i=DB.evals.findIndex(y=>y.id===e.id);if(i>=0)DB.evals[i]=e;else DB.evals.push(e);n++}});persist();renderHist();closeM();toast(n+' evaluaciones importadas.')}catch(e){toast('Archivo no válido.')}};r.readAsText(file);
+}
+function importar(){
+  modal(`<h2>Importar respaldo</h2><p class="note">Elige un archivo de respaldo (.json) o pega su contenido. Se combinará con lo existente.</p><input type="file" accept=".json,application/json" onchange="importarArchivo(this.files[0])" style="margin-bottom:8px"><textarea id="imp" rows="8"></textarea><div class="btns" style="margin-top:8px"><button class="btn" id="okimp">Importar</button><button class="btn sec" onclick="closeM()">Cancelar</button></div><p class="note" id="imperr"></p>`);
+  $('#okimp').onclick=()=>{try{const x=JSON.parse($('#imp').value);const arr=x.evals||[];let n=0;
+    arr.forEach(e=>{if(e&&e.id&&e.datos){const i=DB.evals.findIndex(y=>y.id===e.id);if(i>=0)DB.evals[i]=e;else DB.evals.push(e);n++}});
+    persist();renderHist();closeM();toast(n+' evaluaciones importadas.')}catch(e){$('#imperr').textContent='JSON no válido.'}};
+}
+
+/* ---------- Guía de medición ---------- */
+// Vista a = anterior (lado derecho del evaluado a la izquierda del observador); p = posterior.
+// pt=[x,y] punto; dir=ángulo del pliegue (90 vertical); ln=[x1,y,x2] perímetro; br=[x1,y,x2] diámetro; vt=[x,y1,y2] distancia vertical
+const GCAT=[['tec','Técnica general'],['lm','Puntos anatómicos'],['skin','Pliegues'],['girth','Perímetros'],['br','Diámetros'],['basic','Básicas']];
+const GUIDE=[
+ {id:'tec1',c:'tec',n:'Antes de empezar',t:['Evaluado con ropa mínima, descalzo, sin ejercicio intenso previo. Mide el <b>lado derecho</b>, salvo indicación.','Marca todos los puntos anatómicos con lápiz dermográfico <b>antes</b> de medir; vuelve a palpar si el evaluado cambió de postura.','Mide en serie: recorre todos los sitios, luego repite la serie completa. No tomes dos lecturas seguidas del mismo sitio (el tejido se comprime).']},
+ {id:'tec2',c:'tec',n:'Técnica de pliegue',t:['Toma el pliegue con pulgar e índice, con las yemas, de modo que quede doble capa de piel + tejido subcutáneo sin músculo. Si dudas, pide contraer el músculo subyacente y vuelve a tomar.','El borde de tu pulgar e índice queda <b>sobre la marca</b>; aplica el plicómetro <b>1 cm</b> por debajo (o al lado) de los dedos, perpendicular al pliegue, a la profundidad media de la uña.','Suelta completamente la presión del gatillo y lee <b>2 segundos</b> después. Mantén el pliegue tomado durante la lectura.']},
+ {id:'tec3',c:'tec',n:'Técnica de perímetro y diámetro',t:['Perímetros: técnica de manos cruzadas, cinta perpendicular al eje del segmento, sin comprimir la piel (salvo cabeza). Lee al nivel de los ojos.','Diámetros: sostén las ramas del calibre con índices extendidos, palpa los puntos con los dedos medios y aplica <b>presión firme</b> para minimizar el tejido blando (salvo en tórax).','Error técnico de medición objetivo: ≤5 % pliegues y ≤1 % resto (Nivel 2); ≤7,5 % / ≤1,5 % (Nivel 1).']},
+ // Puntos anatómicos
+ {id:'lm_acr',c:'lm',n:'Acromiale',v:'a',pt:[56,86],t:['Punto más superior y lateral del borde del acromion.','Desde atrás, palpa la espina de la escápula hacia lateral hasta la esquina del acromion; marca en el borde lateral, en su punto más alto.']},
+ {id:'lm_rad',c:'lm',n:'Radiale',v:'a',pt:[20,168],t:['Punto más proximal y lateral de la cabeza del radio.','Palpa en la fosa lateral del codo; una pronosupinación suave del antebrazo te ayuda a sentir la cabeza radial girando.']},
+ {id:'lm_mar',c:'lm',n:'Punto medio acromial-radial',v:'a',pt:[41,128],t:['Mide con el brazo relajado la distancia acromiale–radiale y marca la mitad.','Proyecta esa marca horizontalmente hacia la cara posterior (sitio tríceps) y anterior (sitio bíceps) del brazo.']},
+ {id:'lm_sub',c:'lm',n:'Subscapulare',v:'p',pt:[128,140],t:['Punto más inferior del ángulo inferior de la escápula.','Si cuesta palparlo, pide al evaluado llevar lentamente el brazo derecho detrás de la espalda; vuelve a la posición neutra antes de marcar.']},
+ {id:'lm_icr',c:'lm',n:'Iliocristale',v:'a',pt:[58,232],t:['Punto más lateral de la cresta ilíaca, en la línea medio-axilar.','El evaluado cruza el brazo derecho sobre el pecho; palpa la cresta con la mano en abducción hasta su borde superior.']},
+ {id:'lm_isp',c:'lm',n:'Iliospinale',v:'a',pt:[72,246],t:['Punto más inferior (ápice) de la espina ilíaca anterosuperior.','Sigue la cresta hacia anterior hasta que gira hacia abajo; marca en la punta.']},
+ {id:'lm_mes',c:'lm',n:'Mesosternale',v:'a',pt:[100,130],t:['Punto medio del cuerpo del esternón a nivel de la 4ª articulación condroesternal.','Palpa desde la clavícula: bajo ella está la 1ª costilla; cuenta espacios hasta la 4ª y proyecta al centro del esternón.']},
+ {id:'lm_sty',c:'lm',n:'Stylion',v:'a',pt:[14,246],t:['Punto más distal de la apófisis estiloides del radio.','Palpa en la tabaquera anatómica, en el borde lateral de la muñeca.']},
+ // Pliegues
+ {id:'ptri',c:'skin',n:'Tríceps',v:'p',pt:[160,128],dir:90,t:['<b>Vertical.</b> Cara posterior del brazo, sobre la línea media, a nivel del punto medio acromial-radial.','Brazo relajado al costado, codo extendido, hombro levemente en rotación externa.']},
+ {id:'psub',c:'skin',n:'Subescapular',v:'p',pt:[132,150],dir:45,t:['<b>Oblicuo</b> hacia abajo y lateral (siguiendo las líneas naturales de la piel).','Sitio a 2 cm del subscapulare sobre una línea que baja en 45° hacia lateral. Evaluado de pie, brazos al costado.']},
+ {id:'pbic',c:'skin',n:'Bíceps',v:'a',pt:[44,128],dir:90,t:['<b>Vertical.</b> Cara anterior del brazo, en la parte más anterior del vientre del bíceps, al nivel del punto medio acromial-radial.','Brazo relajado, antebrazo en supinación.']},
+ {id:'pcre',c:'skin',n:'Cresta ilíaca',v:'a',pt:[60,226],dir:15,t:['<b>Casi horizontal</b>, levemente oblicuo hacia abajo y medial.','Inmediatamente por encima del iliocristale. Brazo derecho cruzado sobre el pecho.']},
+ {id:'psup',c:'skin',n:'Supraespinal',v:'a',pt:[71,224],dir:45,t:['<b>Oblicuo</b> hacia abajo y medial (≈45°).','En la intersección de la línea iliospinale–borde axilar anterior con la horizontal que pasa por el iliocristale (en adultos suele quedar 5–7 cm sobre la iliospinale).']},
+ {id:'pabd',c:'skin',n:'Abdominal',v:'a',pt:[88,212],dir:90,t:['<b>Vertical.</b> 5 cm a la derecha del centro del ombligo.','Evaluado relajado, respiración normal. Es un pliegue grueso: asegúrate de no incluir la pared muscular.']},
+ {id:'pmus',c:'skin',n:'Muslo frontal',v:'a',pt:[78,328],dir:90,t:['<b>Paralelo al eje del muslo.</b> Punto medio entre el pliegue inguinal y el borde superior de la rótula, en la línea media anterior.','Evaluado sentado, rodilla a 90°. Si el pliegue es difícil, el evaluado levanta la pierna sosteniendo el muslo por detrás, o un asistente ayuda a sostener el pliegue.']},
+ {id:'ppan',c:'skin',n:'Pantorrilla medial',v:'a',pt:[88,395],dir:90,t:['<b>Vertical.</b> Cara medial de la pantorrilla a nivel del perímetro máximo.','Pie apoyado sobre un cajón, rodilla a 90°. Marca primero el perímetro máximo de pie.']},
+ // Perímetros
+ {id:'cbrr',c:'girth',n:'Brazo relajado',v:'a',ln:[31,128,51],t:['A nivel del punto medio acromial-radial.','Brazo colgando relajado al costado, levemente separado para pasar la cinta.']},
+ {id:'cbrf',c:'girth',n:'Brazo flexionado y contraído',v:'a',ln:[31,124,51],t:['Perímetro máximo del brazo con contracción máxima.','Hombro en flexión a la horizontal, antebrazo en supinación, codo flexionado ~45°. Pide contraer al máximo y busca el mayor perímetro.']},
+ {id:'cant',c:'girth',n:'Antebrazo máximo',v:'a',ln:[17,190,37],t:['Perímetro máximo del antebrazo, distal al codo.','Brazo relajado al costado, mano en supinación relajada. Desliza la cinta hasta encontrar el máximo.']},
+ {id:'ccab',c:'girth',n:'Cabeza',v:'a',ln:[78,32,122],t:['Perímetro máximo, justo sobre la glabela.','Cabeza en plano de Frankfort. Única medición donde se comprime con la cinta (aplasta el pelo).']},
+ {id:'ctor',c:'girth',n:'Tórax mesoesternal',v:'a',ln:[54,130,146],t:['A nivel mesoesternal.','Brazos levemente abducidos para pasar la cinta, luego al costado. Lee al final de una espiración normal.']},
+ {id:'ccin',c:'girth',n:'Cintura (mínima)',v:'a',ln:[58,195,142],t:['Punto más estrecho entre la última costilla y la cresta ilíaca.','Brazos cruzados sobre el pecho, lee al final de una espiración normal. Si no hay un estrechamiento evidente, usa el punto medio entre ambas referencias.']},
+ {id:'ccad',c:'girth',n:'Cadera (glúteo máximo)',v:'p',ln:[57,265,143],t:['Nivel de máxima protuberancia posterior de los glúteos.','De pie, pies juntos, glúteos relajados. Observa de lado para ubicar el nivel.']},
+ {id:'cmu1',c:'girth',n:'Muslo 1 cm bajo pliegue glúteo',v:'p',ln:[107,295,137],t:['1 cm por debajo del pliegue glúteo, perpendicular al eje del muslo.','De pie, pies separados, peso repartido.']},
+ {id:'cmum',c:'girth',n:'Muslo medio',v:'a',ln:[63,328,93],t:['A nivel del punto medio trocantéreo–tibial lateral (o del sitio del pliegue de muslo, según tu protocolo; mantén siempre el mismo).','De pie con peso repartido. Para la ecuación de Lee se resta π × pliegue de muslo.']},
+ {id:'cpan',c:'girth',n:'Pantorrilla máxima',v:'a',ln:[61,395,91],t:['Perímetro máximo de la pantorrilla.','De pie, peso repartido. Desliza la cinta arriba y abajo para encontrar el máximo; ese nivel es el del pliegue medial.']},
+ // Diámetros
+ {id:'dhum',c:'br',n:'Húmero (biepicondilar)',v:'a',br:[17,170,43],t:['Distancia entre epicóndilo lateral y medial del húmero.','Hombro flexionado a la horizontal y codo a 90°. Calibre orientado hacia abajo en la bisectriz del ángulo del codo, presión firme.']},
+ {id:'dfem',c:'br',n:'Fémur (biepicondilar)',v:'a',br:[59,370,93],t:['Distancia entre epicóndilo lateral y medial del fémur.','Sentado, rodilla a 90°. Calibre orientado hacia abajo en la bisectriz del ángulo de la rodilla, presión firme.']},
+ {id:'dbie',c:'br',n:'Biestiloideo',v:'a',br:[10,246,30],t:['Distancia entre apófisis estiloides del radio y del cúbito.','Antebrazo en pronación, muñeca flexionada ~90°.']},
+ {id:'dbac',c:'br',n:'Biacromial',v:'p',br:[56,86,144],t:['Distancia entre los puntos más laterales de los acromion.','Evaluado de pie, medido desde atrás con el calibre grande a ~30° hacia arriba, presión firme.']},
+ {id:'dbil',c:'br',n:'Biileocrestal',v:'a',br:[56,232,144],t:['Distancia entre los puntos más laterales de las crestas ilíacas.','Medido desde el frente, calibre a ~45° hacia arriba, presión firme.']},
+ {id:'dttr',c:'br',n:'Tórax transverso',v:'a',br:[54,130,146],t:['Ancho del tórax a nivel mesoesternal, sobre las costillas más laterales.','Desde el frente, calibre ~30° hacia abajo. Presión ligera; lee al final de una espiración normal.']},
+ {id:'dtap',c:'br',n:'Tórax anteroposterior',v:'a',pt:[100,130],t:['Profundidad del tórax a nivel mesoesternal.','Desde el lado derecho: rama anterior en el mesosternale, rama posterior sobre la apófisis espinosa a ese nivel. Lee al final de una espiración normal.']},
+ // Básicas
+ {id:'masa',c:'basic',n:'Masa corporal',t:['Ropa mínima, vejiga vacía, idealmente en ayunas y a la misma hora en controles sucesivos.','Evaluado de pie al centro de la balanza, sin apoyarse.']},
+ {id:'talla',c:'basic',n:'Talla (técnica de estiramiento)',v:'a',vt:[186,10,446],t:['Talones, glúteos y espalda alta contra el estadiómetro, pies juntos.','Cabeza en plano de Frankfort; pide una inspiración profunda mientras aplicas tracción suave hacia arriba en las apófisis mastoides. Baja la escuadra comprimiendo el pelo.']},
+ {id:'tsent',c:'basic',n:'Talla sentado',v:'a',vt:[186,10,285],t:['Sentado sobre un cajón de altura conocida, manos sobre los muslos, misma técnica de estiramiento.','Resta la altura del cajón a la lectura.']},
+ {id:'enver',c:'basic',n:'Envergadura',v:'a',br:[6,86,194],t:['Distancia entre las puntas de los dedos medios con brazos abducidos a 90°.','Espalda y brazos contra la pared, palmas hacia adelante, máxima extensión.']}
+];
+const GBY=Object.fromEntries(GUIDE.map(g=>[g.id,g]));
+let gCat='tec';
+
+function bodySVG(view){
+  const sk='var(--acc2)',ln='var(--mut)';
+  const limb=(pts,w)=>`<polyline points="${pts}" fill="none" stroke="${ln}" stroke-width="${w+2}" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${pts}" fill="none" stroke="${sk}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  let s=limb('54,92 30,170 20,248',20)+limb('146,92 170,170 180,248',20)+limb('80,285 76,370 74,445',30)+limb('120,285 124,370 126,445',30);
+  s+=`<path d="M58,84 Q100,74 142,84 Q150,120 144,170 Q138,200 142,240 Q146,262 140,285 L60,285 Q54,262 58,240 Q62,200 56,170 Q50,120 58,84 Z" fill="${sk}" stroke="${ln}" stroke-width="1.2"/>`;
+  s+=`<rect x="91" y="60" width="18" height="20" fill="${sk}"/><ellipse cx="100" cy="38" rx="22" ry="27" fill="${sk}" stroke="${ln}" stroke-width="1.2"/>`;
+  if(view==='a')s+=`<circle cx="100" cy="212" r="2" fill="${ln}"/><path d="M100,285 L100,262" stroke="${ln}" stroke-width="1"/>`;
+  else s+=`<path d="M100,90 L100,240" stroke="${ln}" stroke-width="1" stroke-dasharray="2 3"/><path d="M118,122 L132,140 L140,112" fill="none" stroke="${ln}" stroke-width="1"/><path d="M82,122 L68,140 L60,112" fill="none" stroke="${ln}" stroke-width="1"/><path d="M100,262 L100,285 M64,282 Q100,296 136,282" fill="none" stroke="${ln}" stroke-width="1"/>`;
+  s+=`<text x="100" y="458" text-anchor="middle" style="font-size:13px">${view==='a'?'anterior':'posterior'}</text>`;
+  return s;
+}
+function figSVG(g){
+  if(!g.v)return `<svg class="fig" viewBox="0 0 200 470"><g opacity=".55">${bodySVG('a')}</g></svg>`;
+  const R='#e11d48';let m='';
+  if(g.pt){const [x,y]=g.pt;
+    if(g.dir!=null){const a=g.dir*Math.PI/180,dx=Math.cos(a)*16,dy=Math.sin(a)*16;
+      m+=`<line x1="${x-dx}" y1="${y-dy}" x2="${x+dx}" y2="${y+dy}" stroke="${R}" stroke-width="4" stroke-linecap="round" opacity=".55"/>`;}
+    m+=`<circle cx="${x}" cy="${y}" r="5" fill="${R}" stroke="#fff" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="13" fill="none" stroke="${R}" stroke-width="1.5" opacity=".6"/>`;}
+  if(g.ln){const [x1,y,x2]=g.ln;m+=`<ellipse cx="${(x1+x2)/2}" cy="${y}" rx="${(x2-x1)/2+2}" ry="4" fill="none" stroke="${R}" stroke-width="3"/>`;}
+  const arrow=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${R}" stroke-width="2.5" marker-start="url(#ah)" marker-end="url(#ah)"/>`;
+  if(g.br){const [x1,y,x2]=g.br;m+=arrow(x1,y,x2,y);}
+  if(g.vt){const [x,y1,y2]=g.vt;m+=arrow(x,y1,x,y2);}
+  return `<svg class="fig" viewBox="0 0 200 470"><defs><marker id="ah" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${R}"/></marker></defs>${bodySVG(g.v)}${m}</svg>`;
+}
+function gCard(g){
+  const cat=(GCAT.find(c=>c[0]===g.c)||[])[1]||'';
+  return `<div class="card gcard">${figSVG(g)}<div><div class="tag">${cat}</div><h3>${g.n}</h3>${g.t.map(p=>`<p>${p}</p>`).join('')}</div></div>`;
+}
+function renderGuia(){
+  $('#gchips').innerHTML=GCAT.map(([k,t])=>`<button class="chip ${k===gCat?'on':''}" data-gc="${k}">${t}</button>`).join('');
+  $('#guiawrap').innerHTML=GUIDE.filter(g=>g.c===gCat).map(gCard).join('')+
+    `<p class="note">Figuras esquemáticas propias de la app; el lado derecho del evaluado se ve a la izquierda en la vista anterior. Descripciones basadas en el protocolo ISAK; ante dudas, prima tu manual de acreditación.</p>`;
+}
+document.addEventListener('click',e=>{const c=e.target.closest('[data-gc]');if(c){gCat=c.dataset.gc;renderGuia()}});
+function verGuia(id){const g=GBY[id];if(!g)return;
+  const rel=g.c==='skin'||g.id==='cbrr'?['lm_mar','lm_sub','lm_icr','lm_isp'].filter(k=>(id==='ptri'||id==='pbic'||id==='cbrr')?k==='lm_mar':id==='psub'?k==='lm_sub':id==='pcre'?k==='lm_icr':id==='psup'?(k==='lm_icr'||k==='lm_isp'):false):[];
+  modal(`<div class="gcard" style="margin-bottom:8px">${figSVG(g)}<div><h3>${g.n}</h3>${g.t.map(p=>`<p>${p}</p>`).join('')}</div></div>`+
+    rel.map(k=>`<div class="gcard" style="border-top:1px solid var(--line);padding-top:8px">${figSVG(GBY[k])}<div><div class="tag">Punto de referencia</div><h3>${GBY[k].n}</h3>${GBY[k].t.map(p=>`<p>${p}</p>`).join('')}</div></div>`).join('')+
+    `<div class="btns" style="margin-top:8px"><button class="btn" onclick="closeM()">Cerrar</button></div>`);
+}
+
+/* ---------- UI general ---------- */
+function modal(h){$('#modalc').innerHTML=h;$('#modal').classList.remove('hidden')}
+function closeM(){$('#modal').classList.add('hidden')}
+function toast(t){modal(`<p>${esc(t)}</p><div class="btns"><button class="btn" onclick="closeM()">OK</button></div>`)}
+function go(t){
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id==='s-'+t));
+  if(t==='res')renderRes();if(t==='bia')renderBia();if(t==='hist')renderHist();if(t==='guia')renderGuia();
+  window.scrollTo(0,0);
+}
+function syncForm(){
+  document.querySelectorAll('[data-d]').forEach(el=>{const k=el.dataset.d;if(el.type==='checkbox')el.checked=!!S.datos[k];else el.value=S.datos[k]??''});
+  document.querySelectorAll('[data-b]').forEach(el=>el.value=S.bia[el.dataset.b]??'');
+  document.querySelectorAll('[data-p]').forEach(el=>el.value=(DB.prof||{})[el.dataset.p]??'');
+  window.logoUI&&logoUI();
+  $('#who').textContent=S.datos.nombre?S.datos.nombre+(S.datos.fecha?' · '+S.datos.fecha:''):'Nueva evaluación';
+}
+document.getElementById('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.t)});
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el.dataset.m){(S.med[el.dataset.m]=S.med[el.dataset.m]||['','',''])[+el.dataset.i]=el.value;updMed()}
+  else if(el.dataset.d){S.datos[el.dataset.d]=el.type==='checkbox'?el.checked:el.value;
+    if(el.dataset.d==='full')renderMed();
+    $('#who').textContent=S.datos.nombre?S.datos.nombre+(S.datos.fecha?' · '+S.datos.fecha:''):'Nueva evaluación';}
+  else if(el.dataset.b){S.bia[el.dataset.b]=el.value;renderBia()}
+  else if(el.dataset.p){DB.prof[el.dataset.p]=el.value}
+  else return;
+  persist();
+});
+document.addEventListener('change',e=>{if(e.target.dataset.d==='full'){S.datos.full=e.target.checked;renderMed();persist()}});
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeM()});
+
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+load();if(!S.bia.eq)S.bia.eq='auto';syncForm();renderMed();
+</script>
+<script src="jspdf.umd.min.js"></script>
+<script src="informe.js"></script>
+</body>
+</html>
